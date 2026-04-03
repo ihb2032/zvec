@@ -15,6 +15,7 @@
 #pragma once
 
 #include <cstdint>
+
 namespace zvec {
 namespace ailego {
 namespace internal {
@@ -179,8 +180,13 @@ class CpuFeatures {
   //! Hardware virtualization
   static bool VMX(void);
 
-  // ！Running on a hypervisor
   static bool HYPERVISOR(void);
+
+  //! RISC-V Vector Extension
+  static bool RISCV_VECTOR(void);
+
+  //! RISC-V Zvfh Extension
+  static bool RISCV_ZVFH(void);
 
   //! Intrinsics of compiling
   static const char *Intrinsics(void);
@@ -196,6 +202,7 @@ class CpuFeatures {
     uint32_t L7_EBX;
     uint32_t L7_ECX;
     uint32_t L7_EDX;
+    uint32_t RISCV_FLAGS;
   };
 
   //! Static Members
@@ -359,8 +366,13 @@ class CpuFeatures {
     //! Hardware virtualization
     bool VMX = CpuFeatures::VMX();
 
-    // ！Running on a hypervisor
     bool HYPERVISOR = CpuFeatures::HYPERVISOR();
+
+    //! RISC-V Vector Extension
+    bool RISCV_VECTOR = CpuFeatures::RISCV_VECTOR();
+
+    //! RISC-V Zvfh Extension
+    bool RISCV_ZVFH = CpuFeatures::RISCV_ZVFH();
   };
   static StaticFlags static_flags_;
 };
