@@ -40,26 +40,11 @@ jobs:
           submodules: recursive
 
       - name: Set up Python
-        if: ${{ !contains(inputs.os, 'riscv') }}
         uses: actions/setup-python@v6
         with:
           python-version: '3.10'
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-
-      - name: Select Python on RISC-V
-        if: ${{ contains(inputs.os, 'riscv') }}
-        run: |
-          python3.10 --version
-          echo "PYTHON=python3.10" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Select Python on non-RISC-V
-        if: ${{ !contains(inputs.os, 'riscv') }}
-        run: |
-          python --version
-          echo "PYTHON=python" >> $GITHUB_ENV
-        shell: bash
 
       - name: Install Clang
         if: inputs.compiler == 'clang' && runner.os == 'Linux'
@@ -88,23 +73,19 @@ jobs:
             echo "CXX=clang++" >> $GITHUB_ENV
           fi
 
-          echo "$($PYTHON -c 'import site; print(site.USER_BASE)')/bin" >> $GITHUB_PATH
+          echo "$(python -c 'import site; print(site.USER_BASE)')/bin" >> $GITHUB_PATH
         shell: bash
 
       - name: Install dependencies
         run: |
-          $PYTHON -m pip install --upgrade pip
-
-          if [[ "${{ inputs.os }}" == *"riscv"* ]]; then
-            echo "RISC-V architecture detected. Installing pre-built NumPy, CMake and ninja from RISE..."
-            RISE_PYPI="https://gitlab.com/api/v4/projects/56254198/packages/pypi/simple"
-            $PYTHON -m pip install numpy==2.2.2 cmake==3.30.0 ninja==1.11.1.1 --index-url "$RISE_PYPI"
-            DEPS="pybind11==3.0 pytest scikit-build-core setuptools_scm"
-          else
-            DEPS="pybind11==3.0 cmake==3.30.0 ninja==1.11.1 pytest scikit-build-core setuptools_scm"
-          fi
-
-          $PYTHON -m pip install $DEPS
+          python -m pip install --upgrade pip
+          python -m pip install \
+            pybind11==3.0 \
+            cmake==3.30.0 \
+            ninja==1.11.1 \
+            pytest \
+            scikit-build-core \
+            setuptools_scm
         shell: bash
 
       - name: Build from source
@@ -113,7 +94,7 @@ jobs:
 
           CMAKE_GENERATOR="Unix Makefiles" \
           CMAKE_BUILD_PARALLEL_LEVEL="$NPROC" \
-          $PYTHON -m pip install -v . \
+          python -m pip install -v . \
             --no-build-isolation \
             --config-settings='cmake.define.BUILD_TOOLS="ON"' \
             ${{ matrix.arch_flag }}
@@ -128,7 +109,7 @@ jobs:
       - name: Run Python Tests
         run: |
           cd "$GITHUB_WORKSPACE"
-          $PYTHON -m pytest python/tests/
+          python -m pytest python/tests/
         shell: bash
 
       - name: Run C++ Examples
