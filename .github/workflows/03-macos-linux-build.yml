@@ -96,13 +96,9 @@ jobs:
           $PYTHON -m pip install --upgrade pip
 
           if [[ "${{ inputs.os }}" == *"riscv"* ]]; then
-            echo "RISC-V architecture detected. Installing pre-built NumPy and CMake from RISE..."
+            echo "RISC-V architecture detected. Installing pre-built NumPy, CMake and ninja from RISE..."
             RISE_PYPI="https://gitlab.com/api/v4/projects/56254198/packages/pypi/simple"
-
-            $PYTHON -m pip install numpy==2.2.2 --index-url "$RISE_PYPI"
-            $PYTHON -m pip install cmake==3.30.0 --index-url "$RISE_PYPI"
-            $PYTHON -m pip install -v --no-build-isolation ninja==1.11.1
-
+            $PYTHON -m pip install numpy==2.2.2 cmake==3.30.0 ninja==1.11.1.1 --index-url "$RISE_PYPI"
             DEPS="pybind11==3.0 pytest scikit-build-core setuptools_scm"
           else
             DEPS="pybind11==3.0 cmake==3.30.0 ninja==1.11.1 pytest scikit-build-core setuptools_scm"
