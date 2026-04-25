@@ -27,6 +27,7 @@ jobs:
           sudo mkdir -p /var/lib/apt/lists/
           sudo mkdir -p /var/cache/apt/archives/          
           sudo touch /var/lib/dpkg/status          
+          sudo apt-get purge -y byobu || true
           sudo apt-get update -o Dpkg::Lock::Timeout=300
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
             -o Dpkg::Options::="--force-confdef" \
@@ -85,6 +86,7 @@ jobs:
           sudo mkdir -p /var/lib/apt/lists/
           sudo mkdir -p /var/cache/apt/archives/
           sudo touch /var/lib/dpkg/status
+          sudo apt-get purge -y byobu || true
           sudo apt-get update -o Dpkg::Lock::Timeout=300
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
             -o Dpkg::Options::="--force-confdef" \
@@ -149,6 +151,7 @@ jobs:
           sudo mkdir -p /var/lib/apt/lists/
           sudo mkdir -p /var/cache/apt/archives/
           sudo touch /var/lib/dpkg/status
+          sudo apt-get purge -y byobu || true
           sudo apt-get update -o Dpkg::Lock::Timeout=300
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
             -o Dpkg::Options::="--force-confdef" \
@@ -168,7 +171,8 @@ jobs:
             -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TOOLS=ON \
-            -DBUILD_PYTHON_BINDINGS=ON
+            -DBUILD_PYTHON_BINDINGS=ON \
+            -Dpybind11_DIR="$($PYTHON -c 'import pybind11; print(pybind11.get_cmake_dir())')"
         shell: bash
 
       - name: Install from existing build directory
