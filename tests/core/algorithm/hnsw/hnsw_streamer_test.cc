@@ -15,7 +15,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <atomic>
-#include <cstdlib>
 #ifndef _MSC_VER
 #include <fcntl.h>
 #include <unistd.h>
@@ -2181,12 +2180,7 @@ TEST_F(HnswStreamerTest, TestKnnSearchCosine) {
 
     auto &linearResult = linearCtx->result();
     ASSERT_EQ(topk, linearResult.size());
-    // On platforms without SIMD (e.g., RISC-V), scalar FP rounding
-    // differences may cause adjacent vectors with near-identical cosine
-    // distances to swap in ranking. Allow top-1 to be within +/-1.
-    EXPECT_LE(std::abs(static_cast<int64_t>(linearResult[0].key()) -
-                       static_cast<int64_t>(i)),
-              1);
+    ASSERT_EQ(i, linearResult[0].key());
 
     for (size_t k = 0; k < topk; ++k) {
       totalCnts++;
@@ -2208,7 +2202,7 @@ TEST_F(HnswStreamerTest, TestKnnSearchCosine) {
            topk1Recall, cost);
 #endif
   EXPECT_GT(recall, 0.90f);
-  EXPECT_GT(topk1Recall, 0.90f);
+  EXPECT_GT(topk1Recall, 0.95f);
   // EXPECT_GT(cost, 2.0f);
 }
 
@@ -2411,12 +2405,7 @@ TEST_F(HnswStreamerTest, TestFetchVectorCosine) {
 
     auto &linearResult = linearCtx->result();
     ASSERT_EQ(topk, linearResult.size());
-    // On platforms without SIMD (e.g., RISC-V), scalar FP rounding
-    // differences may cause adjacent vectors with near-identical cosine
-    // distances to swap in ranking. Allow top-1 to be within +/-1.
-    EXPECT_LE(std::abs(static_cast<int64_t>(linearResult[0].key()) -
-                       static_cast<int64_t>(i)),
-              1);
+    ASSERT_EQ(i, linearResult[0].key());
 
     ASSERT_NE(knnResult[0].vector(), nullptr);
 
@@ -2424,9 +2413,8 @@ TEST_F(HnswStreamerTest, TestFetchVectorCosine) {
     denormalized_vec.resize(dim * sizeof(float));
     reformer->revert(linearResult[0].vector(), new_meta, &denormalized_vec);
 
-    float expected_add_on = linearResult[0].key() * 10;
     float vector_value = *(((float *)(denormalized_vec.data()) + dim - 1));
-    EXPECT_NEAR(vector_value, fixed_value + expected_add_on, epsilon);
+    EXPECT_NEAR(vector_value, fixed_value + add_on, epsilon);
   }
   std::cout << "knnTotalTime: " << knnTotalTime << std::endl;
   std::cout << "linearTotalTime: " << linearTotalTime << std::endl;
